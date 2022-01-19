@@ -47,17 +47,8 @@ char wczytajZnak() {
     return znak;
 }
 
-int wyznaczID (vector <DaneZnajomego> WszyscyZnajomi) {
-    if (WszyscyZnajomi.size() == 0)
-        return 1;
 
-    else
-        return WszyscyZnajomi[WszyscyZnajomi.size() - 1].NumerIdZnajomego + 1;
-
-}
-
-
-vector <DaneZnajomego>DodajZnajomego (vector <DaneZnajomego> WszyscyZnajomi) {
+void DodajZnajomego (vector <DaneZnajomego> & WszyscyZnajomi) {
 
 
     DaneZnajomego DodawanyZnajomy;
@@ -66,11 +57,18 @@ vector <DaneZnajomego>DodajZnajomego (vector <DaneZnajomego> WszyscyZnajomi) {
     string WprowadzonyNumerTelefonuZnajomego;
     string WprowadzonyAdresEmailZnajomego;
     string WprowadzonyAdresDomowyZnajomego;
-    int NadajID = wyznaczID(WszyscyZnajomi);
+    int NadajID;
 
     system("cls");
     cout << "Wprowadz imie" << endl;
     cin >> WprowadzoneImieZnajomego;
+
+    if (WszyscyZnajomi.size() == 0)
+        NadajID = 1;
+    else
+        NadajID = WszyscyZnajomi[WszyscyZnajomi.size() - 1].NumerIdZnajomego + 1;
+
+
     DodawanyZnajomy.NumerIdZnajomego = NadajID;
     DodawanyZnajomy.ImieZnajomego = WprowadzoneImieZnajomego;
 
@@ -113,7 +111,7 @@ vector <DaneZnajomego>DodajZnajomego (vector <DaneZnajomego> WszyscyZnajomi) {
     cout << endl;
 
     system("pause");
-    return WszyscyZnajomi;
+
 }
 
 
@@ -165,7 +163,7 @@ vector<DaneZnajomego> wczytajZnajomegoZPliku() {
     return WszyscyZnajomi;
 }
 
-void wypiszZnajomego (vector <DaneZnajomego> WszyscyZnajomi) {
+void wypiszZnajomego (vector <DaneZnajomego> & WszyscyZnajomi) {
     int iloscOsob = 1;
     for ( DaneZnajomego &e : WszyscyZnajomi ) {
         cout << iloscOsob << endl;
@@ -180,7 +178,7 @@ void wypiszZnajomego (vector <DaneZnajomego> WszyscyZnajomi) {
     system("pause");
 }
 
-void WyszukajPoImieniu (vector <DaneZnajomego> WszyscyZnajomi) {
+void WyszukajPoImieniu (vector <DaneZnajomego> & WszyscyZnajomi) {
 
     string imieDoWyszukania;
     int liczbaOsobOPodanymImieniu = 0;
@@ -214,7 +212,7 @@ void WyszukajPoImieniu (vector <DaneZnajomego> WszyscyZnajomi) {
 
 }
 
-void WyszukajPoNazwisku (vector <DaneZnajomego> WszyscyZnajomi) {
+void WyszukajPoNazwisku (vector <DaneZnajomego> & WszyscyZnajomi) {
 
     string nazwiskoDoWyszukania;
     int liczbaOsobOPodanymNazwisku = 0;
@@ -249,7 +247,7 @@ void WyszukajPoNazwisku (vector <DaneZnajomego> WszyscyZnajomi) {
     system("pause");
 }
 
-vector<DaneZnajomego> usunWpis (vector <DaneZnajomego> WszyscyZnajomi) {
+void usunWpis (vector <DaneZnajomego> & WszyscyZnajomi) {
 
     int numerOsobyDoUsuniecia;
     char potwierdzenie;
@@ -287,10 +285,9 @@ vector<DaneZnajomego> usunWpis (vector <DaneZnajomego> WszyscyZnajomi) {
         cout << endl;
     }
     system("pause");
-    return WszyscyZnajomi;
 }
 
-vector<DaneZnajomego> edytujWpis (vector <DaneZnajomego> WszyscyZnajomi) {
+void edytujWpis (vector <DaneZnajomego> & WszyscyZnajomi) {
 
     int numerOsobyDoEdycji;
     int zmiana;
@@ -371,7 +368,7 @@ vector<DaneZnajomego> edytujWpis (vector <DaneZnajomego> WszyscyZnajomi) {
 
 
     system("pause");
-    return WszyscyZnajomi;
+
 }
 
 bool CzyPlikIstnieje () {
@@ -391,7 +388,7 @@ bool CzyPlikIstnieje () {
     return plik;
 }
 
-void aktualizujPlikTekstowy (vector <DaneZnajomego> WszyscyZnajomi) {
+void aktualizujPlikTekstowy (vector <DaneZnajomego> & WszyscyZnajomi) {
 
     DaneZnajomego ZapisywanyZnajomy;
     fstream adressBook;
@@ -445,7 +442,7 @@ int main() {
         cout << endl;
 
         if(wybor == '1') {
-            WszyscyZnajomi = DodajZnajomego (WszyscyZnajomi);
+            DodajZnajomego (WszyscyZnajomi);
             aktualizujPlikTekstowy(WszyscyZnajomi);
         } else if(wybor == '2') {
 
@@ -489,7 +486,7 @@ int main() {
                 cout << "Brak wpisow w ksiazce!" << endl;
                 system("pause");
             } else
-                WszyscyZnajomi = usunWpis(WszyscyZnajomi);
+                usunWpis(WszyscyZnajomi);
 
             aktualizujPlikTekstowy(WszyscyZnajomi);
         } else if(wybor == '6') {
@@ -500,7 +497,7 @@ int main() {
                 cout << "Brak wpisow w ksiazce!" << endl;
                 system("pause");
             } else
-                WszyscyZnajomi =  edytujWpis(WszyscyZnajomi);
+                edytujWpis(WszyscyZnajomi);
             aktualizujPlikTekstowy(WszyscyZnajomi);
         } else if(wybor == '9') {
             aktualizujPlikTekstowy(WszyscyZnajomi);
