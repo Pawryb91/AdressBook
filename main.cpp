@@ -3,12 +3,10 @@
 #include <fstream>
 #include <vector>
 #include <string>
-#include <cstdio>
 
 using namespace std;
 
 void WyswietlMenuLogowania () {
-    system("cls");
     cout << "1.Logowanie" << endl;
     cout << "2.Rejestracja" << endl;
     cout << "3.Zamknij program" << endl;
@@ -19,6 +17,7 @@ struct Uzytkownik {
     string NazwaUzytkownika;
     string HasloUzytkownika;
 };
+
 
 
 void zmianaHasla (vector <Uzytkownik> &Uzytkownicy) {
@@ -55,28 +54,24 @@ void zmianaHasla (vector <Uzytkownik> &Uzytkownicy) {
     }
 
     UzytkownicyPlik.close();
+
 }
 
-bool SprawdzCzyNazwaUzytkownikaJestZajeta (string NazwaUzytkownika, vector <Uzytkownik> &Uzytkownicy) {
+bool sprawdzCzyNazwaUzytkownikaJestWolna (string NazwaUzytkownika,vector <Uzytkownik> &Uzytkownicy) {
 
-    bool WynikTestu;
-    for(int i = 0; i <= Uzytkownicy.size() - 1 ; i++) {
-        if (NazwaUzytkownika == Uzytkownicy[i].NazwaUzytkownika) {
-            cout << "Nazwa uzytkownika jest zajeta" << endl;
-            system("pause");
-            WynikTestu = true;
+    bool test = true;
+    for (int i = 0; i < Uzytkownicy.size(); i++) {
+        if( NazwaUzytkownika == Uzytkownicy[i].NazwaUzytkownika) {
+            test = false;
             break;
         }
-        else
-            WynikTestu = false;
     }
-    return WynikTestu;
+    return test;
 }
-
 void RejestracjaUzytkownika (vector <Uzytkownik> &Uzytkownicy) {
 
     Uzytkownik DodawanyUzytkownik;
-    bool CzyNazwaUzytkownikaJestZajeta;
+    bool CzyNazwaJestWolna = true;
 
     if (Uzytkownicy.size() == 0)
         DodawanyUzytkownik.NumerIdUzytkownika = 1;
@@ -84,18 +79,16 @@ void RejestracjaUzytkownika (vector <Uzytkownik> &Uzytkownicy) {
         DodawanyUzytkownik.NumerIdUzytkownika = Uzytkownicy.size() + 1;
 
     do {
-        system ("cls");
         cout << "Podaj nazwe uzytkownika" << endl;
         cin >> DodawanyUzytkownik.NazwaUzytkownika;
-        CzyNazwaUzytkownikaJestZajeta = SprawdzCzyNazwaUzytkownikaJestZajeta (DodawanyUzytkownik.NazwaUzytkownika,Uzytkownicy);
-    } while(CzyNazwaUzytkownikaJestZajeta == true);
-
+        CzyNazwaJestWolna = sprawdzCzyNazwaUzytkownikaJestWolna(DodawanyUzytkownik.NazwaUzytkownika, Uzytkownicy);
+        if (CzyNazwaJestWolna == false)
+            cout << "Nazwa " << DodawanyUzytkownik.NazwaUzytkownika << " jest zajeta. Prosze podac inna nazwe."<< endl;
+    } while (CzyNazwaJestWolna == false);
 
 
     cout << "Podaj haslo" << endl;
     cin >> DodawanyUzytkownik.HasloUzytkownika;
-
-    cout << DodawanyUzytkownik.NumerIdUzytkownika << " " << DodawanyUzytkownik.NazwaUzytkownika << " " << DodawanyUzytkownik.HasloUzytkownika << endl;
 
     fstream UzytkownicyPlik;
 
@@ -109,6 +102,7 @@ void RejestracjaUzytkownika (vector <Uzytkownik> &Uzytkownicy) {
 
     cout << "Zarejestrowano uzytkownika: " << DodawanyUzytkownik.NazwaUzytkownika << endl;
     system("pause");
+    system ("cls");
 
 }
 
@@ -210,7 +204,7 @@ struct DaneZnajomego {
 };
 
 
-char wczytajZnak() {
+char wczytajPojedynczyZnak() {
 
     string wejscie = "";
     char znak  = {0};
@@ -228,7 +222,7 @@ char wczytajZnak() {
 }
 
 
-void DodajZnajomego (vector <DaneZnajomego> & WszyscyZnajomi, int IdUzytkownika, int IdOstatniegoAdresata) {
+void DodajZnajomego (vector <DaneZnajomego> & WszyscyZnajomi, int IdUzytkownika) {
 
 
     DaneZnajomego DodawanyZnajomy;
@@ -244,8 +238,13 @@ void DodajZnajomego (vector <DaneZnajomego> & WszyscyZnajomi, int IdUzytkownika,
     cout << "Wprowadz imie" << endl;
     cin >> WprowadzoneImieZnajomego;
 
+    if (WszyscyZnajomi.size() == 0)
+        NadajID = 1;
+    else
+        NadajID = WszyscyZnajomi[WszyscyZnajomi.size() - 1].NumerIdZnajomego + 1;
 
-    DodawanyZnajomy.NumerIdZnajomego = IdOstatniegoAdresata + 1;;
+
+    DodawanyZnajomy.NumerIdZnajomego = NadajID;
     DodawanyZnajomy.IdUzytkownika = IdUzytkownika;
 
     DodawanyZnajomy.ImieZnajomego = WprowadzoneImieZnajomego;
@@ -274,7 +273,7 @@ void DodajZnajomego (vector <DaneZnajomego> & WszyscyZnajomi, int IdUzytkownika,
 
     fstream adressBook;
 
-    adressBook.open("ksiazkaAdresowa.txt", ios::out | ios::app );
+    adressBook.open("ksiazkaAdresowa.txt", ios::out | ios::app);
 
     adressBook << DodawanyZnajomy.NumerIdZnajomego << "|";
     adressBook << DodawanyZnajomy.IdUzytkownika << "|";
@@ -348,40 +347,6 @@ vector<DaneZnajomego> wczytajZnajomegoZPliku(int IdUzytkownika) {
     }
     adressBook.close();
     return WszyscyZnajomi;
-}
-
-int wczytajOstatnieIdZPliku() {
-
-    //DaneZnajomego WczytywanyZnajomy;
-    //vector <DaneZnajomego> WszyscyZnajomi;
-    string LiniaPlikuDoWczytania;
-    size_t znalezionaPozycja = 0;
-    string numerIDosoby;
-    //string numerIDUzytkownika;
-    int OstatnieId;
-    string OstatniaLinia;
-
-
-    fstream adressBook;
-
-    adressBook.open("ksiazkaAdresowa.txt", ios::in);
-
-    while (getline(adressBook,LiniaPlikuDoWczytania)) {
-        OstatniaLinia = LiniaPlikuDoWczytania;
-    }
-
-    znalezionaPozycja = OstatniaLinia.find("|");
-
-    if( znalezionaPozycja != std::string::npos ) {
-        numerIDosoby = OstatniaLinia.substr(0,znalezionaPozycja);
-        OstatnieId = atoi(numerIDosoby.c_str());
-    }
-    else
-        OstatnieId = 0;
-
-    adressBook.close();
-
-    return OstatnieId;
 }
 
 void wypiszZnajomego (vector <DaneZnajomego> & WszyscyZnajomi) {
@@ -469,11 +434,10 @@ void WyszukajPoNazwisku (vector <DaneZnajomego> & WszyscyZnajomi) {
     system("pause");
 }
 
-int usunWpis (vector <DaneZnajomego> & WszyscyZnajomi) {
+void usunWpis (vector <DaneZnajomego> & WszyscyZnajomi) {
 
     int numerOsobyDoUsuniecia;
     char potwierdzenie;
-    int IdUsunietegoWpisu;
 
     for (int i = 0; i < WszyscyZnajomi.size(); i++) {
         cout << i + 1 << " " << WszyscyZnajomi[i].ImieZnajomego << " " << WszyscyZnajomi[i].NazwiskoZnajomego << endl;
@@ -488,9 +452,7 @@ int usunWpis (vector <DaneZnajomego> & WszyscyZnajomi) {
         if(numerOsobyDoUsuniecia < 1 || numerOsobyDoUsuniecia > WszyscyZnajomi.size()+1)
             cout << "Wprowadzono nieprawidlowa wartosc. Sprobuj ponownie." << endl;
 
-    }
-
-    while (numerOsobyDoUsuniecia < 1 || numerOsobyDoUsuniecia > WszyscyZnajomi.size()+1);
+    } while (numerOsobyDoUsuniecia < 1 || numerOsobyDoUsuniecia > WszyscyZnajomi.size()+1);
 
     cout << endl;
     cout << "Jestes pewien, ze chcesz usunac wpis "<< numerOsobyDoUsuniecia <<", jesli tak wcisnij: t " <<  endl;
@@ -501,8 +463,6 @@ int usunWpis (vector <DaneZnajomego> & WszyscyZnajomi) {
 
     it = WszyscyZnajomi.begin() + numerOsobyDoUsuniecia - 1;
 
-    IdUsunietegoWpisu = it->IdUzytkownika;
-
     if (potwierdzenie == 't') {
         WszyscyZnajomi.erase (it);
         cout << "Wpis zostal usuniety";
@@ -512,7 +472,6 @@ int usunWpis (vector <DaneZnajomego> & WszyscyZnajomi) {
         cout << endl;
     }
     system("pause");
-    return IdUsunietegoWpisu;
 }
 
 int edytujWpis (vector <DaneZnajomego> & WszyscyZnajomi) {
@@ -521,7 +480,7 @@ int edytujWpis (vector <DaneZnajomego> & WszyscyZnajomi) {
     int zmiana;
     string NowaDana;
 
-    cout << "Kogo dane chcesz edytowac (wybierz odpowiedni numer?" << endl;
+    cout << "Kogo dane chcesz edytowac (wybierz odpowiedni numer?)" << endl;
     cout << endl;
 
     for (int i = 0; i < WszyscyZnajomi.size(); i++) {
@@ -604,7 +563,7 @@ bool CzyPlikIstnieje () {
     bool plik;
     fstream adressBook;
 
-    adressBook.open("ksiazkaAdresowa.txt",ios::in);
+    adressBook.open("KsiazkaAdresowa.txt",ios::in);
 
     if (adressBook.good() == true)
         plik = true;
@@ -621,7 +580,7 @@ void aktualizujPlikTekstowy (vector <DaneZnajomego> & WszyscyZnajomi) {
     DaneZnajomego ZapisywanyZnajomy;
     fstream adressBook;
 
-    adressBook.open("ksiazkaAdresowa.txt", ios::out );
+    adressBook.open("ksiazkaAdresowaTemp.txt", ios::out );
 
     for (int i = 0; i < WszyscyZnajomi.size(); i++) {
 
@@ -650,117 +609,71 @@ void aktualizujPlikTekstowy (vector <DaneZnajomego> & WszyscyZnajomi) {
 
 }
 
-void aktualizujPlikTekstowyPoDodaniuAdresata (vector <DaneZnajomego> & WszyscyZnajomi, int IdDodanegoAdresata) {
-
-    DaneZnajomego ZapisywanyZnajomy;
-    fstream adressBook;
-
-    adressBook.open("ksiazkaAdresowa.txt", ios::out | ios::app);
-
-    ZapisywanyZnajomy.NumerIdZnajomego = WszyscyZnajomi[WszyscyZnajomi.size() - 1].NumerIdZnajomego;
-    ZapisywanyZnajomy.IdUzytkownika = WszyscyZnajomi[WszyscyZnajomi.size() - 1].IdUzytkownika;
-    ZapisywanyZnajomy.ImieZnajomego = WszyscyZnajomi[WszyscyZnajomi.size() - 1].ImieZnajomego;
-    ZapisywanyZnajomy.NazwiskoZnajomego = WszyscyZnajomi[WszyscyZnajomi.size() - 1].NazwiskoZnajomego;
-    ZapisywanyZnajomy.NumerTelefonuZnajomego = WszyscyZnajomi[WszyscyZnajomi.size() - 1].NumerTelefonuZnajomego;
-    ZapisywanyZnajomy.AdresEmailZnajomego = WszyscyZnajomi[WszyscyZnajomi.size() - 1].AdresEmailZnajomego;
-    ZapisywanyZnajomy.AdresDomowyZnajomego = WszyscyZnajomi[WszyscyZnajomi.size() - 1].AdresDomowyZnajomego;
-
-
-    adressBook << ZapisywanyZnajomy.NumerIdZnajomego << "|";
-    adressBook << ZapisywanyZnajomy.IdUzytkownika << "|";
-    adressBook << ZapisywanyZnajomy.ImieZnajomego << "|";
-    adressBook << ZapisywanyZnajomy.NazwiskoZnajomego << "|";
-    adressBook << ZapisywanyZnajomy.NumerTelefonuZnajomego << "|";
-    adressBook << ZapisywanyZnajomy.AdresEmailZnajomego << "|";
-    adressBook << ZapisywanyZnajomy.AdresDomowyZnajomego << "|" << endl;
-
-    adressBook.close();
-
-
-}
-
 void aktualizujPlikTekstowyPoEdycjiWpisu (vector <DaneZnajomego> & WszyscyZnajomi, int IdEdytowanegoWpisu) {
 
     fstream AdressBook;
-    fstream AdressBookTemp;
     string LiniaPlikuDoWczytania;
     size_t znalezionaPozycja;
     string numerIDosoby;
     DaneZnajomego WczytywanyZnajomy;
 
     AdressBook.open("ksiazkaAdresowa.txt", ios::in);
-    AdressBookTemp.open("ksiazkaAdresowaTemp.txt", ios::out | ios::app);
-
-    cout << "ksiazkaAdresowaTemp" << endl;
 
 
     while (getline(AdressBook,LiniaPlikuDoWczytania)) {
         znalezionaPozycja = LiniaPlikuDoWczytania.find("|");
 
-        if (znalezionaPozycja != std::string::npos) {
+        if ( znalezionaPozycja != std::string::npos ) {
             numerIDosoby = LiniaPlikuDoWczytania.substr(0,znalezionaPozycja);
             WczytywanyZnajomy.NumerIdZnajomego = atoi(numerIDosoby.c_str());
         }
         if (WczytywanyZnajomy.NumerIdZnajomego == IdEdytowanegoWpisu) {
+            AdressBook.open("ksiazkaAdresowaTemp.txt", ios::out | ios::app);
 
-            AdressBookTemp << WszyscyZnajomi[IdEdytowanegoWpisu - 1].NumerIdZnajomego << "|";
-            AdressBookTemp << WszyscyZnajomi[IdEdytowanegoWpisu - 1].IdUzytkownika << "|";
-            AdressBookTemp << WszyscyZnajomi[IdEdytowanegoWpisu - 1].ImieZnajomego << "|";
-            AdressBookTemp << WszyscyZnajomi[IdEdytowanegoWpisu - 1].NazwiskoZnajomego << "|";
-            AdressBookTemp << WszyscyZnajomi[IdEdytowanegoWpisu - 1].NumerTelefonuZnajomego << "|";
-            AdressBookTemp << WszyscyZnajomi[IdEdytowanegoWpisu - 1].AdresEmailZnajomego << "|";
-            AdressBookTemp << WszyscyZnajomi[IdEdytowanegoWpisu - 1].AdresDomowyZnajomego << "|" << endl;
-        } else
-            AdressBookTemp << LiniaPlikuDoWczytania << endl;
+            AdressBook << WszyscyZnajomi[IdEdytowanegoWpisu - 1].NumerIdZnajomego << "|";
+            AdressBook << WszyscyZnajomi[IdEdytowanegoWpisu - 1].IdUzytkownika << "|";
+            AdressBook << WszyscyZnajomi[IdEdytowanegoWpisu - 1].ImieZnajomego << "|";
+            AdressBook << WszyscyZnajomi[IdEdytowanegoWpisu - 1].NazwiskoZnajomego << "|";
+            AdressBook << WszyscyZnajomi[IdEdytowanegoWpisu - 1].NumerTelefonuZnajomego << "|";
+            AdressBook << WszyscyZnajomi[IdEdytowanegoWpisu - 1].AdresEmailZnajomego << "|";
+            AdressBook << WszyscyZnajomi[IdEdytowanegoWpisu - 1].AdresDomowyZnajomego << "|" << endl;
+
+        }
     }
     AdressBook.close();
-    AdressBookTemp.close();
-    remove ("ksiazkaAdresowa.txt");
-    cout << "usunieto ksiazkaAdresowa.txt" << endl;
-
-    system("pause");
-    rename ("ksiazkaAdresowaTemp.txt","ksiazkaAdresowa.txt");
-    cout << "zmieniono nazwe ksiazkaAdresowaTemp na ksiazkaAdresowa.txt" << endl;
-    system("pause");
-
 }
 
-void aktualizujPlikTekstowyPoUsunieciuWpisu (vector <DaneZnajomego> & WszyscyZnajomi, int IdUsunietegoWpisu) {
+void aktualizujPlikTekstowyPoUsunieciuWpisu (vector <DaneZnajomego> & WszyscyZnajomi) {
 
-    fstream AdressBook;
-    fstream AdressBookTemp;
-    string LiniaPlikuDoWczytania;
-    size_t znalezionaPozycja;
-    string numerIDosoby;
-    DaneZnajomego WczytywanyZnajomy;
+    DaneZnajomego ZapisywanyZnajomy;
+    fstream adressBook;
 
-    AdressBook.open("ksiazkaAdresowa.txt", ios::in);
-    AdressBookTemp.open("ksiazkaAdresowaTemp.txt", ios::out | ios::app);
+    adressBook.open("ksiazkaAdresowaTemp.txt", ios::out );
 
-    cout << "ksiazkaAdresowaTemp" << endl;
+    for (int i = 0; i < WszyscyZnajomi.size(); i++) {
+
+        ZapisywanyZnajomy.NumerIdZnajomego = WszyscyZnajomi[i].NumerIdZnajomego;
+        ZapisywanyZnajomy.IdUzytkownika = WszyscyZnajomi[i].IdUzytkownika;
+        ZapisywanyZnajomy.ImieZnajomego = WszyscyZnajomi[i].ImieZnajomego;
+        ZapisywanyZnajomy.NazwiskoZnajomego = WszyscyZnajomi[i].NazwiskoZnajomego;
+        ZapisywanyZnajomy.NumerTelefonuZnajomego = WszyscyZnajomi[i].NumerTelefonuZnajomego;
+        ZapisywanyZnajomy.AdresEmailZnajomego = WszyscyZnajomi[i].AdresEmailZnajomego;
+        ZapisywanyZnajomy.AdresDomowyZnajomego = WszyscyZnajomi[i].AdresDomowyZnajomego;
 
 
-    while (getline(AdressBook,LiniaPlikuDoWczytania)) {
-        znalezionaPozycja = LiniaPlikuDoWczytania.find("|");
+        adressBook << ZapisywanyZnajomy.NumerIdZnajomego << "|";
+        adressBook << ZapisywanyZnajomy.IdUzytkownika << "|";
+        adressBook << ZapisywanyZnajomy.ImieZnajomego << "|";
+        adressBook << ZapisywanyZnajomy.NazwiskoZnajomego << "|";
+        adressBook << ZapisywanyZnajomy.NumerTelefonuZnajomego << "|";
+        adressBook << ZapisywanyZnajomy.AdresEmailZnajomego << "|";
+        adressBook << ZapisywanyZnajomy.AdresDomowyZnajomego << "|" << endl;
 
-        if (znalezionaPozycja != std::string::npos) {
-            numerIDosoby = LiniaPlikuDoWczytania.substr(0,znalezionaPozycja);
-            WczytywanyZnajomy.NumerIdZnajomego = atoi(numerIDosoby.c_str());
-        }
-        if (WczytywanyZnajomy.NumerIdZnajomego == IdUsunietegoWpisu) {
-            continue;
-        } else
-            AdressBookTemp << LiniaPlikuDoWczytania << endl;
+
     }
-    AdressBook.close();
-    AdressBookTemp.close();
-    remove ("ksiazkaAdresowa.txt");
-    cout << "usunieto ksiazkaAdresowa.txt" << endl;
 
-    system("pause");
-    rename ("ksiazkaAdresowaTemp.txt","ksiazkaAdresowa.txt");
-    cout << "zmieniono nazwe ksiazkaAdresowaTemp na ksiazkaAdresowa.txt" << endl;
-    system("pause");
+    adressBook.close();
+
 
 }
 
@@ -772,18 +685,14 @@ int main() {
     char wybor;
     int IdUzytkownika;
     vector <Uzytkownik> Uzytkownicy;
-    int NumerIDEdytowanegoAdresata;
-    int NumerIDUsunietegoAdresata;
-    int IdOstatniegoAdresata;
 
 
     while (true) {
         Uzytkownicy = WczytajUzytkownikow();
-
+        cin.sync();
         WyswietlMenuLogowania ();
         cout << "Twoj wybor: " << endl;
-        cin >> wybor;
-        //wybor = '2';
+        wybor = wczytajPojedynczyZnak();
 
         if (wybor == '1') {
             system("cls");
@@ -799,14 +708,14 @@ int main() {
                     cin.sync();
                     WyswietlMenuGlowne();
 
-                    wybor = wczytajZnak();
+
+                    wybor = wczytajPojedynczyZnak();
 
                     cout << endl;
 
                     if(wybor == '1') {
-                        IdOstatniegoAdresata = wczytajOstatnieIdZPliku();
-                        cout<<"OstatnieID" << IdOstatniegoAdresata << endl;
-                        DodajZnajomego (WszyscyZnajomi,IdUzytkownika,IdOstatniegoAdresata);
+                        DodajZnajomego (WszyscyZnajomi,IdUzytkownika);
+                        aktualizujPlikTekstowy(WszyscyZnajomi);
                     } else if(wybor == '2') {
 
                         system("cls");
@@ -849,8 +758,9 @@ int main() {
                             cout << "Brak wpisow w ksiazce!" << endl;
                             system("pause");
                         } else
-                            NumerIDUsunietegoAdresata = usunWpis(WszyscyZnajomi);
-                        aktualizujPlikTekstowyPoUsunieciuWpisu (WszyscyZnajomi,NumerIDUsunietegoAdresata);
+                            usunWpis(WszyscyZnajomi);
+
+                        aktualizujPlikTekstowy(WszyscyZnajomi);
                     } else if(wybor == '6') {
 
                         system("cls");
@@ -858,16 +768,17 @@ int main() {
                         if(WszyscyZnajomi.size() == 0) {
                             cout << "Brak wpisow w ksiazce!" << endl;
                             system("pause");
-                        } else {
-                            NumerIDEdytowanegoAdresata = edytujWpis(WszyscyZnajomi);
-                            aktualizujPlikTekstowyPoEdycjiWpisu(WszyscyZnajomi,NumerIDEdytowanegoAdresata);
-                        }
+                        } else
+                            edytujWpis(WszyscyZnajomi);
+                        aktualizujPlikTekstowy(WszyscyZnajomi);
                     } else if(wybor == '7') {
                         zmianaHasla (Uzytkownicy);
+                        //aktualizujPlikTekstowy(WszyscyZnajomi);
                     }
 
 
                     else if(wybor == '8') {
+                        aktualizujPlikTekstowy(WszyscyZnajomi);
                         system ("cls");
                         break;
 
@@ -887,6 +798,9 @@ int main() {
 
         if (wybor == '3')
             exit(0);
+        else
+            system("cls");
+
     }
 
 
