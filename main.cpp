@@ -41,12 +41,13 @@ void WyszukajPoImieniu (vector <DaneZnajomego> & WszyscyZnajomi);
 void WyszukajPoNazwisku (vector <DaneZnajomego> & WszyscyZnajomi);
 void aktualizujPlikTekstowyPoUsunieciuWpisu (vector <DaneZnajomego> & WszyscyZnajomi, int IdUsunietegoWpisu);
 void usunWpis (vector <DaneZnajomego> & WszyscyZnajomi);
-void WyswietlMenuEdycjiWpisu (vector <DaneZnajomego> & WszyscyZnajomi, int numerOsobyDoEdycji);
-void WyswietlUzytkownikaPoEdycji (vector <DaneZnajomego> & WszyscyZnajomi, int numerOsobyDoEdycji);
+void wypiszZnajomychZWektora (vector <DaneZnajomego> & WszyscyZnajomi);
+bool WyswietlMenuEdycjiWpisu (vector <DaneZnajomego> & WszyscyZnajomi, int IdOsobyDoEdycji);
+void WyswietlUzytkownikaPoEdycji (vector <DaneZnajomego> & WszyscyZnajomi, int IdOsobyDoEdycji);
 void edytujWpis (vector <DaneZnajomego> & WszyscyZnajomi);
 bool CzyPlikIstnieje ();
 void aktualizujPlikTekstowyPoDodaniuAdresata (vector <DaneZnajomego> & WszyscyZnajomi, int IdDodanegoAdresata);
-void aktualizujPlikTekstowyPoEdycjiWpisu (vector <DaneZnajomego> & WszyscyZnajomi, int IdEdytowanegoWpisu, int numerEdytowanegoWpisu);
+void aktualizujPlikTekstowyPoEdycjiWpisu (vector <DaneZnajomego> & WszyscyZnajomi, int IdEdytowanegoWpisu);
 
 int main() {
 
@@ -56,7 +57,6 @@ int main() {
     char wyborMenuGlowne;
     int IdUzytkownika;
     vector <Uzytkownik> Uzytkownicy;
-    int NumerIDEdytowanegoAdresata;
     Uzytkownik DodawanyUzytkownik;
 
 
@@ -193,13 +193,12 @@ void zmianaHasla (vector <Uzytkownik> &Uzytkownicy, int IdUzytkownika) {
                 aktualizujPlikTekstowyPoZmianieHaslaUzytkownika(Uzytkownicy);
                 cout << "Haslo zostalo zmienione" << endl;
                 break;
+            } else {
+                cout << "Bledne haslo" << endl;
+                system("pause");
+                break;
             }
-        else{
-            cout << "Bledne haslo" << endl;
-        system("pause");
-        break;
         }
-    }
 
     }
     system("pause");
@@ -654,103 +653,113 @@ void aktualizujPlikTekstowyPoUsunieciuWpisu (vector <DaneZnajomego> & WszyscyZna
 }
 void usunWpis (vector <DaneZnajomego> & WszyscyZnajomi) {
 
-    int numerOsobyDoUsuniecia;
+    int IdOsobyDoUsuniecia;
     char potwierdzenie;
-    int IdUsunietegoWpisu;
+    bool czyAdresatIstnieje;
 
     if(WszyscyZnajomi.size() == 0)
         cout << "Brak wpisow." << endl;
     else {
-
-        for (int i = 0; i < WszyscyZnajomi.size(); i++) {
-            cout << i + 1 << " " << WszyscyZnajomi[i].ImieZnajomego << " " << WszyscyZnajomi[i].NazwiskoZnajomego << endl;
-        }
-
+        czyAdresatIstnieje = false;
         cout << endl;
         cout << "Ktory wpis usunac (wpisz odpowiedni numer) ?" << endl;
+        wypiszZnajomychZWektora(WszyscyZnajomi);
 
-        do {
-            numerOsobyDoUsuniecia = wczytajLiczbeCalkowita();
 
-            if(numerOsobyDoUsuniecia < 1 || numerOsobyDoUsuniecia >= WszyscyZnajomi.size()+1)
-                cout << "Wprowadzono nieprawidlowa wartosc. Sprobuj ponownie." << endl;
+        IdOsobyDoUsuniecia = wczytajLiczbeCalkowita();
 
-        }while (numerOsobyDoUsuniecia < 1 || numerOsobyDoUsuniecia >= WszyscyZnajomi.size()+1);
+        for (vector <DaneZnajomego>::iterator itr = WszyscyZnajomi.begin(); itr != WszyscyZnajomi.end(); itr ++) {
+            if (itr -> NumerIdZnajomego == IdOsobyDoUsuniecia) {
+                czyAdresatIstnieje = true;
 
-        cout << endl;
-        cout << "Jestes pewien, ze chcesz usunac wpis "<< numerOsobyDoUsuniecia <<", jesli tak wcisnij: t " <<  endl;
+                cout << endl;
+                cout << "Jestes pewien, ze chcesz usunac wpis "<< itr -> ImieZnajomego << " " << itr -> NazwiskoZnajomego <<", jesli tak wcisnij: t " <<  endl;
 
-        cin >> potwierdzenie;
+                cin >> potwierdzenie;
 
-        vector <DaneZnajomego>::iterator it;
-
-        it = WszyscyZnajomi.begin() + numerOsobyDoUsuniecia - 1;
-
-        IdUsunietegoWpisu = it-> NumerIdZnajomego;
-
-        if (potwierdzenie == 't') {
-            WszyscyZnajomi.erase (it);
-            aktualizujPlikTekstowyPoUsunieciuWpisu(WszyscyZnajomi, IdUsunietegoWpisu);
-            cout << "Wpis zostal usuniety";
-            cout << endl;
-        } else {
-            cout << "Wpis nie zostal usuniety";
-            cout << endl;
+                if (potwierdzenie == 't') {
+                    WszyscyZnajomi.erase (itr);
+                    aktualizujPlikTekstowyPoUsunieciuWpisu(WszyscyZnajomi,IdOsobyDoUsuniecia);
+                    cout << "Wpis zostal usuniety";
+                    cout << endl;
+                } else {
+                    cout << "Wpis nie zostal usuniety";
+                    cout << endl;
+                }
+            }
         }
+        if(czyAdresatIstnieje == false)
+            cout << "Brak adresata o podanym ID "<< endl;
     }
     system("pause");
 }
-void WyswietlMenuEdycjiWpisu (vector <DaneZnajomego> & WszyscyZnajomi, int numerOsobyDoEdycji) {
-    system("cls");
+bool WyswietlMenuEdycjiWpisu (vector <DaneZnajomego> & WszyscyZnajomi, int IdOsobyDoEdycji) {
+    //system("cls");
 
-    cout << "Ktora dana chcesz zmienic?" << endl;
-    cout <<"1 - Imie: "<< WszyscyZnajomi[numerOsobyDoEdycji - 1].ImieZnajomego << endl;
-    cout <<"2 - Nazwisko: "<< WszyscyZnajomi[numerOsobyDoEdycji- 1].NazwiskoZnajomego << endl;
-    cout <<"3 - Numer telefonu: "<< WszyscyZnajomi[numerOsobyDoEdycji - 1].NumerTelefonuZnajomego << endl;
-    cout <<"4 - Adres e-mial: "<< WszyscyZnajomi[numerOsobyDoEdycji - 1].AdresEmailZnajomego << endl;
-    cout <<"5 - Adres domowy: "<< WszyscyZnajomi[numerOsobyDoEdycji - 1].AdresDomowyZnajomego << endl;
-    cout <<"6 - powrot do menu" << endl;
-    cout << endl;
+    bool czyAdresatIstnieje = false;
+
+
+    for (vector <DaneZnajomego>::iterator itr = WszyscyZnajomi.begin(); itr != WszyscyZnajomi.end(); itr ++) {
+        if(itr->NumerIdZnajomego == IdOsobyDoEdycji) {
+
+            czyAdresatIstnieje = true;
+
+            cout << "Ktora dana chcesz zmienic?" << endl;
+            cout <<"1 - Imie: "<< itr -> ImieZnajomego << endl;
+            cout <<"2 - Nazwisko: "<< itr -> NazwiskoZnajomego << endl;
+            cout <<"3 - Numer telefonu: "<< itr -> NumerTelefonuZnajomego << endl;
+            cout <<"4 - Adres e-mial: "<< itr -> AdresEmailZnajomego << endl;
+            cout <<"5 - Adres domowy: "<< itr -> AdresDomowyZnajomego << endl;
+            cout <<"6 - powrot do menu" << endl;
+            cout << endl;
+        }
+    }
+    return czyAdresatIstnieje;
+
 }
-void WyswietlUzytkownikaPoEdycji (vector <DaneZnajomego> & WszyscyZnajomi, int numerOsobyDoEdycji) {
+void WyswietlUzytkownikaPoEdycji (vector <DaneZnajomego> & WszyscyZnajomi, int IdOsobyDoEdycji) {
 
-    cout << "Wpis zostal zmieniony" << endl;
-    cout << endl;
-    cout <<"1 - Imie: "<< WszyscyZnajomi[numerOsobyDoEdycji - 1].ImieZnajomego << endl;
-    cout <<"2 - Nazwisko: "<< WszyscyZnajomi[numerOsobyDoEdycji - 1].NazwiskoZnajomego << endl;
-    cout <<"3 - Numer telefonu: "<< WszyscyZnajomi[numerOsobyDoEdycji - 1].NumerTelefonuZnajomego << endl;
-    cout <<"4 - Adres e-mial: "<< WszyscyZnajomi[numerOsobyDoEdycji - 1].AdresEmailZnajomego << endl;
-    cout <<"5 - Adres domowy: "<< WszyscyZnajomi[numerOsobyDoEdycji - 1].AdresDomowyZnajomego << endl;
-    cout << endl;
+    for (vector <DaneZnajomego>::iterator itr = WszyscyZnajomi.begin(); itr != WszyscyZnajomi.end(); itr ++) {
+        if(itr->NumerIdZnajomego == IdOsobyDoEdycji) {
+            cout <<"Imie: "<< itr -> ImieZnajomego << endl;
+            cout <<"Nazwisko: "<< itr -> NazwiskoZnajomego << endl;
+            cout <<"Numer telefonu: "<< itr -> NumerTelefonuZnajomego << endl;
+            cout <<"Adres e-mial: "<< itr -> AdresEmailZnajomego << endl;
+            cout <<"Adres domowy: "<< itr -> AdresDomowyZnajomego << endl;
+            cout << endl;
+        }
+    }
+
+}
+
+void wypiszZnajomychZWektora (vector <DaneZnajomego> & WszyscyZnajomi) {
+
+    for (vector<DaneZnajomego>::iterator itr = WszyscyZnajomi.begin(); itr != WszyscyZnajomi.end(); itr++) {
+        cout <<"Numer ID: "<< itr->NumerIdZnajomego << " " << itr->ImieZnajomego << " " << itr->NazwiskoZnajomego << endl << endl;
+    }
 
 }
 void edytujWpis (vector <DaneZnajomego> & WszyscyZnajomi) {
 
-    int numerOsobyDoEdycji;
+    int IdOsobyDoEdycji;
     int zmiana;
     string NowaDana;
+    bool czyPoprawneID;
 
     if(WszyscyZnajomi.size() == 0)
         cout << "Brak wpisow." << endl;
     else {
 
-        cout << "Kogo dane chcesz edytowac (wybierz odpowiedni numer?)" << endl;
+        cout << "Kogo dane chcesz edytowac (podaj numer ID?)" << endl;
         cout << endl;
 
-        for (int i = 0; i < WszyscyZnajomi.size(); i++) {
-            cout << i + 1 << " " << WszyscyZnajomi[i].ImieZnajomego << " " << WszyscyZnajomi[i].NazwiskoZnajomego << endl;
-        }
+        wypiszZnajomychZWektora(WszyscyZnajomi);
+        IdOsobyDoEdycji = wczytajLiczbeCalkowita();
+        czyPoprawneID = WyswietlMenuEdycjiWpisu(WszyscyZnajomi, IdOsobyDoEdycji);
 
-        do {
-            numerOsobyDoEdycji = wczytajLiczbeCalkowita();
+    }
 
-            if(numerOsobyDoEdycji < 1 || numerOsobyDoEdycji >= WszyscyZnajomi.size()+1)
-                cout << "Wprowadzono nieprawidlowa wartosc. Sprobuj ponownie." << endl;
-
-        } while (numerOsobyDoEdycji < 1 || numerOsobyDoEdycji >= WszyscyZnajomi.size()+1);
-
-
-        WyswietlMenuEdycjiWpisu(WszyscyZnajomi, numerOsobyDoEdycji);
+    if(czyPoprawneID == true) {
 
         do {
             zmiana = wczytajLiczbeCalkowita();
@@ -759,33 +768,48 @@ void edytujWpis (vector <DaneZnajomego> & WszyscyZnajomi) {
 
             case 1:
                 cout << "Wprowadz nowe imie" << endl;
-                WszyscyZnajomi[numerOsobyDoEdycji - 1].ImieZnajomego = wczytajLinie();
-                WyswietlUzytkownikaPoEdycji (WszyscyZnajomi,numerOsobyDoEdycji);
-                aktualizujPlikTekstowyPoEdycjiWpisu(WszyscyZnajomi,WszyscyZnajomi[numerOsobyDoEdycji - 1].NumerIdZnajomego,numerOsobyDoEdycji);
+                for (vector <DaneZnajomego>::iterator itr = WszyscyZnajomi.begin(); itr != WszyscyZnajomi.end(); itr++)
+                    if (itr -> NumerIdZnajomego == IdOsobyDoEdycji)
+                        itr -> ImieZnajomego = wczytajLinie();
+
+                WyswietlUzytkownikaPoEdycji (WszyscyZnajomi,IdOsobyDoEdycji);
+                aktualizujPlikTekstowyPoEdycjiWpisu(WszyscyZnajomi,IdOsobyDoEdycji);
                 break;
             case 2:
                 cout << "Wprowadz nowe nazwisko" << endl;
-                WszyscyZnajomi[numerOsobyDoEdycji - 1].NazwiskoZnajomego = wczytajLinie();
-                WyswietlUzytkownikaPoEdycji (WszyscyZnajomi,numerOsobyDoEdycji);
-                aktualizujPlikTekstowyPoEdycjiWpisu(WszyscyZnajomi,WszyscyZnajomi[numerOsobyDoEdycji - 1].NumerIdZnajomego,numerOsobyDoEdycji);
+                for (vector <DaneZnajomego>::iterator itr = WszyscyZnajomi.begin(); itr != WszyscyZnajomi.end(); itr++)
+                    if (itr -> NumerIdZnajomego == IdOsobyDoEdycji)
+                        itr -> NazwiskoZnajomego = wczytajLinie();
+
+                WyswietlUzytkownikaPoEdycji (WszyscyZnajomi,IdOsobyDoEdycji);
+                aktualizujPlikTekstowyPoEdycjiWpisu(WszyscyZnajomi,IdOsobyDoEdycji);
                 break;
             case 3:
                 cout << "Wprowadz nowy numer telefonu" << endl;
-                WszyscyZnajomi[numerOsobyDoEdycji - 1].NumerTelefonuZnajomego = wczytajLinie();
-                WyswietlUzytkownikaPoEdycji (WszyscyZnajomi,numerOsobyDoEdycji);
-                aktualizujPlikTekstowyPoEdycjiWpisu(WszyscyZnajomi,WszyscyZnajomi[numerOsobyDoEdycji - 1].NumerIdZnajomego,numerOsobyDoEdycji);
+                for (vector <DaneZnajomego>::iterator itr = WszyscyZnajomi.begin(); itr != WszyscyZnajomi.end(); itr++)
+                    if (itr -> NumerIdZnajomego == IdOsobyDoEdycji)
+                        itr -> NumerTelefonuZnajomego = wczytajLinie();
+
+                WyswietlUzytkownikaPoEdycji (WszyscyZnajomi,IdOsobyDoEdycji);
+                aktualizujPlikTekstowyPoEdycjiWpisu(WszyscyZnajomi,IdOsobyDoEdycji);
                 break;
             case 4:
                 cout << "Wprowadz nowy adres email" << endl;
-                WszyscyZnajomi[numerOsobyDoEdycji - 1].AdresEmailZnajomego = wczytajLinie();
-                WyswietlUzytkownikaPoEdycji (WszyscyZnajomi,numerOsobyDoEdycji);
-                aktualizujPlikTekstowyPoEdycjiWpisu(WszyscyZnajomi,WszyscyZnajomi[numerOsobyDoEdycji - 1].NumerIdZnajomego,numerOsobyDoEdycji);
+                for (vector <DaneZnajomego>::iterator itr = WszyscyZnajomi.begin(); itr != WszyscyZnajomi.end(); itr++)
+                    if (itr -> NumerIdZnajomego == IdOsobyDoEdycji)
+                        itr -> AdresEmailZnajomego = wczytajLinie();
+
+                WyswietlUzytkownikaPoEdycji (WszyscyZnajomi,IdOsobyDoEdycji);
+                aktualizujPlikTekstowyPoEdycjiWpisu(WszyscyZnajomi,IdOsobyDoEdycji);
                 break;
             case 5:
                 cout << "Wprowadz nowy adres domowy" << endl;
-                WszyscyZnajomi[numerOsobyDoEdycji - 1].AdresDomowyZnajomego = wczytajLinie();
-                WyswietlUzytkownikaPoEdycji (WszyscyZnajomi,numerOsobyDoEdycji);
-                aktualizujPlikTekstowyPoEdycjiWpisu(WszyscyZnajomi,WszyscyZnajomi[numerOsobyDoEdycji - 1].NumerIdZnajomego,numerOsobyDoEdycji);
+                for (vector <DaneZnajomego>::iterator itr = WszyscyZnajomi.begin(); itr != WszyscyZnajomi.end(); itr++)
+                    if (itr -> NumerIdZnajomego == IdOsobyDoEdycji)
+                        itr -> AdresDomowyZnajomego = wczytajLinie();
+
+                WyswietlUzytkownikaPoEdycji (WszyscyZnajomi,IdOsobyDoEdycji);
+                aktualizujPlikTekstowyPoEdycjiWpisu(WszyscyZnajomi,IdOsobyDoEdycji);
                 break;
             case 6:
                 break;
@@ -795,8 +819,10 @@ void edytujWpis (vector <DaneZnajomego> & WszyscyZnajomi) {
             }
 
         } while (zmiana < 1 || zmiana > 6);
+    } else
+        cout << "Brak adresata o podanym ID "<< endl;
 
-    }
+
     system("pause");
 }
 bool CzyPlikIstnieje () {
@@ -843,7 +869,7 @@ void aktualizujPlikTekstowyPoDodaniuAdresata (vector <DaneZnajomego> & WszyscyZn
 
 
 }
-void aktualizujPlikTekstowyPoEdycjiWpisu (vector <DaneZnajomego> & WszyscyZnajomi, int IdEdytowanegoWpisu, int numerEdytowanegoWpisu) {
+void aktualizujPlikTekstowyPoEdycjiWpisu (vector <DaneZnajomego> & WszyscyZnajomi, int IdEdytowanegoWpisu) {
 
     fstream AdressBook;
     fstream AdressBookTemp;
@@ -861,18 +887,22 @@ void aktualizujPlikTekstowyPoEdycjiWpisu (vector <DaneZnajomego> & WszyscyZnajom
         if (znalezionaPozycja != std::string::npos) {
             numerIDosoby = LiniaPlikuDoWczytania.substr(0,znalezionaPozycja);
             WczytywanyZnajomy.NumerIdZnajomego = atoi(numerIDosoby.c_str());
-        }
-        if (WczytywanyZnajomy.NumerIdZnajomego == IdEdytowanegoWpisu) {
+            if(WczytywanyZnajomy.NumerIdZnajomego == IdEdytowanegoWpisu) {
+                for (vector<DaneZnajomego>::iterator itr = WszyscyZnajomi.begin(); itr != WszyscyZnajomi.end(); itr++) {
+                    if(itr -> NumerIdZnajomego == IdEdytowanegoWpisu) {
 
-            AdressBookTemp << WszyscyZnajomi[numerEdytowanegoWpisu - 1].NumerIdZnajomego << "|";
-            AdressBookTemp << WszyscyZnajomi[numerEdytowanegoWpisu - 1].IdUzytkownika << "|";
-            AdressBookTemp << WszyscyZnajomi[numerEdytowanegoWpisu - 1].ImieZnajomego << "|";
-            AdressBookTemp << WszyscyZnajomi[numerEdytowanegoWpisu - 1].NazwiskoZnajomego << "|";
-            AdressBookTemp << WszyscyZnajomi[numerEdytowanegoWpisu - 1].NumerTelefonuZnajomego << "|";
-            AdressBookTemp << WszyscyZnajomi[numerEdytowanegoWpisu - 1].AdresEmailZnajomego << "|";
-            AdressBookTemp << WszyscyZnajomi[numerEdytowanegoWpisu - 1].AdresDomowyZnajomego << "|" << endl;
-        } else
-            AdressBookTemp << LiniaPlikuDoWczytania << endl;
+                        AdressBookTemp << itr -> NumerIdZnajomego << "|";
+                        AdressBookTemp << itr -> IdUzytkownika << "|";
+                        AdressBookTemp << itr -> ImieZnajomego << "|";
+                        AdressBookTemp << itr -> NazwiskoZnajomego << "|";
+                        AdressBookTemp << itr -> NumerTelefonuZnajomego << "|";
+                        AdressBookTemp << itr -> AdresEmailZnajomego << "|";
+                        AdressBookTemp << itr -> AdresDomowyZnajomego << "|" << endl;
+                    }
+                }
+            } else
+                AdressBookTemp << LiniaPlikuDoWczytania << endl;
+        }
     }
     AdressBook.close();
     AdressBookTemp.close();
